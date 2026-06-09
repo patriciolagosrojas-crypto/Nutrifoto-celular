@@ -1,3 +1,15 @@
+/ Aumenta el límite de Vercel de 1MB a 10MB para permitir que pasen las fotografías
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
+// Aumenta el límite de tiempo a 60 segundos por si OpenAI tarda en analizar la foto
+export const maxDuration = 60; 
+
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
 function fallbackAnalysis(payload = {}) {
@@ -69,7 +81,7 @@ nutritionVerdict{score,summary,strengths[],concerns[],practicalAdjustments[]},
 telomeraseCellularAssimilation{verdict,supportiveSignals[],missingSignals[]}, disclaimer.
 Evalua ingredientes probables, tipo de coccion, calidad proteica, fibra, grasas, ultraprocesados, potencial antiinflamatorio, soporte para retrasar sarcopenia y asimilacion celular. Se cientificamente prudente: no prometas activar telomerasa ni tratar enfermedades. Notas del usuario: ${payload.notes || "sin notas"}. Objetivos: ${(payload.goals || []).join(", ") || "general"}.`;
 
-  const response = await fetch("[https://api.openai.com/v1/chat/completions](https://api.openai.com/v1/chat/completions)", {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
