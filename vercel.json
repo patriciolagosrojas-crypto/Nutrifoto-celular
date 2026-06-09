@@ -2,14 +2,14 @@
   "buildCommand": null,
   "outputDirectory": ".",
   "functions": {
-    "analyze.cjs": {
+    "api/analyze.cjs": {
       "maxDuration": 30
     }
   },
   "rewrites": [
     {
       "source": "/api/analyze",
-      "destination": "/analyze.cjs"
+      "destination": "/api/analyze.cjs"
     },
     {
       "source": "/",
