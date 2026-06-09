@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d7c66">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="NutriFoto">
+    <title>NutriFoto Celular</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="capture-panel">
+        <div class="brand-row">
+          <div class="brand-mark">N</div>
+          <div>
+            <p class="eyebrow">Analisis fotografico nutricional</p>
+            <h1>NutriFoto Celular</h1>
+          </div>
+        </div>
+
+        <div class="viewer">
+          <video id="camera" autoplay playsinline hidden></video>
+          <img id="preview" alt="Vista previa del plato" hidden>
+          <div id="emptyState" class="empty-state">
+            <span>+</span>
+            <p>Toma o carga una foto del plato servido</p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="startCamera" type="button">Camara</button>
+          <button id="snapPhoto" type="button" disabled>Capturar</button>
+          <label class="file-button">
+            Subir foto
+            <input id="fileInput" type="file" accept="image/*" capture="environment">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Notas visibles o ingredientes conocidos</span>
+          <textarea id="notes" rows="4" placeholder="Ej.: salmon a la plancha, quinoa, palta, ensalada, aceite de oliva..."></textarea>
+        </label>
+
+        <fieldset class="goals">
+          <legend>Objetivo principal</legend>
+          <label><input type="checkbox" value="sarcopenia" checked> Retardar sarcopenia</label>
+          <label><input type="checkbox" value="telomeros"> Soporte telomeros/telomerasa</label>
+          <label><input type="checkbox" value="asimilacion"> Asimilacion celular</label>
+          <label><input type="checkbox" value="glucosa"> Control glucosa/energia</label>
+        </fieldset>
+
+        <button id="analyze" class="primary" type="button">Analizar plato</button>
+      </section>
+
+      <section class="results-panel" aria-live="polite">
+        <div class="result-header">
+          <p class="eyebrow">Veredicto</p>
+          <h2 id="dishName">Esperando una foto</h2>
+          <div class="score-ring" id="scoreRing" data-score="--"></div>
+        </div>
+
+        <div id="loading" class="loading" hidden>Analizando imagen y patrones nutricionales...</div>
+        <div id="errorBox" class="error" hidden></div>
+
+        <div id="results" class="results" hidden>
+          <p id="summary" class="summary"></p>
+          <p id="confidence" class="confidence"></p>
+
+          <div class="grid">
+            <article>
+              <h3>Ingredientes probables</h3>
+              <ul id="ingredients"></ul>
+            </article>
+            <article>
+              <h3>Coccion</h3>
+              <ul id="cooking"></ul>
+            </article>
+            <article>
+              <h3>Fortalezas</h3>
+              <ul id="strengths"></ul>
+            </article>
+            <article>
+              <h3>Alertas</h3>
+              <ul id="concerns"></ul>
+            </article>
+          </div>
+
+          <article class="wide">
+            <h3>Telomerasa, sarcopenia y asimilacion celular</h3>
+            <p id="cellVerdict"></p>
+            <div class="two-col">
+              <ul id="supportive"></ul>
+              <ul id="missing"></ul>
+            </div>
+          </article>
+
+          <article class="wide">
+            <h3>Ajustes practicos</h3>
+            <ul id="adjustments"></ul>
+          </article>
+
+          <p id="disclaimer" class="disclaimer"></p>
+        </div>
+      </section>
+    </main>
+
+    <canvas id="canvas" hidden></canvas>
+    <script src="app.js"></script>
+  </body>
+</html>

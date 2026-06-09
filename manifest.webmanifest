@@ -1,0 +1,19 @@
+{
+  "name": "NutriFoto Celular",
+  "short_name": "NutriFoto",
+  "description": "Analisis fotografico nutricional para platos servidos.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f7f2",
+  "theme_color": "#0d7c66",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
