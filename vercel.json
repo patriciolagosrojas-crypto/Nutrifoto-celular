@@ -1,4 +1,6 @@
 {
+  "buildCommand": null,
+  "outputDirectory": ".",
   "functions": {
     "api/analyze.cjs": {
       "maxDuration": 30
