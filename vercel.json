@@ -1,9 +1,19 @@
 {
   "functions": {
-    "api/analyze.js": {
+    "api/analyze.cjs": {
       "maxDuration": 30
     }
   },
+  "rewrites": [
+    {
+      "source": "/api/analyze",
+      "destination": "/api/analyze.cjs"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/manifest.webmanifest",
