@@ -1,3 +1,5 @@
+const OPENAI_API_KEY = "PEGA_TU_LLAVE_DE_OPENAI_AQUI"; // <--- Pega tu API Key real aquí entre las comillas
+
 const camera = document.querySelector("#camera");
 const preview = document.querySelector("#preview");
 const canvas = document.querySelector("#canvas");
@@ -16,6 +18,7 @@ const scoreRing = document.querySelector("#scoreRing");
 let stream = null;
 let imageDataUrl = "";
 
+// 1. Registro del Service Worker (Para que se instale como App)
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch(() => {
@@ -49,10 +52,11 @@ function setScore(score) {
   scoreRing.style.background = `conic-gradient(${color} ${value * 3.6}deg, #d9e2de 0deg)`;
 }
 
+// 2. Controles de Cámara y Archivos
 startCamera.addEventListener("click", async () => {
   try {
     if (!navigator.mediaDevices?.getUserMedia) {
-      throw new Error("La camara directa requiere HTTPS o abrir la app como localhost. Usa Subir foto o publica la app con HTTPS.");
+      throw new Error("La cámara directa requiere HTTPS.");
     }
     stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: "environment" } },
@@ -64,7 +68,7 @@ startCamera.addEventListener("click", async () => {
     emptyState.hidden = true;
     snapPhoto.disabled = false;
   } catch (error) {
-    errorBox.textContent = `No se pudo abrir la camara: ${error.message}`;
+    errorBox.textContent = `No se pudo abrir la cámara: ${error.message}`;
     errorBox.hidden = false;
   }
 });
@@ -76,6 +80,12 @@ snapPhoto.addEventListener("click", () => {
   canvas.height = height;
   canvas.getContext("2d").drawImage(camera, 0, 0, width, height);
   setPreview(canvas.toDataURL("image/jpeg", 0.9));
+
+  // Apagar la cámara del celular tras tomar la foto
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
 });
 
 fileInput.addEventListener("change", () => {
@@ -86,7 +96,10 @@ fileInput.addEventListener("change", () => {
   reader.readAsDataURL(file);
 });
 
+// 3. Conexión Directa a la Inteligencia Artificial (Frontend)
 analyze.addEventListener("click", async () => {
+  if (!imageDataUrl) return;
+
   errorBox.hidden = true;
   results.hidden = true;
   loading.hidden = false;
@@ -94,15 +107,49 @@ analyze.addEventListener("click", async () => {
 
   const goals = [...document.querySelectorAll(".goals input:checked")].map((input) => input.value);
 
-  try {
-    const response = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageDataUrl, notes: notes.value, goals })
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.detail || data.error || "Error desconocido");
+  if (!OPENAI_API_KEY || OPENAI_API_KEY === "PEGA_TU_LLAVE_DE_OPENAI_AQUI") {
+     errorBox.textContent = "Por favor, pega tu llave de OpenAI en el archivo app.js";
+     errorBox.hidden = false;
+     loading.hidden = true;
+     analyze.disabled = false;
+     return;
+  }
 
+  try {
+    const prompt = `Analiza una fotografía de un plato servido. Responde SOLO JSON válido con estas claves:
+dishName, confidence, ingredients[{name,evidence,estimatedPortion}], cookingMethods[],
+nutritionVerdict{score,summary,strengths[],concerns[],practicalAdjustments[]},
+telomeraseCellularAssimilation{verdict,supportiveSignals[],missingSignals[]}, disclaimer.
+Evalúa ingredientes probables, tipo de cocción, calidad proteica, fibra, grasas, ultraprocesados, potencial antiinflamatorio, soporte para retrasar sarcopenia y asimilación celular. Sé científicamente prudente. Notas del usuario: ${notes.value || "sin notas"}. Objetivos: ${goals.join(", ") || "general"}.`;
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: imageDataUrl } }
+            ]
+          }
+        ],
+        temperature: 0.2
+      })
+    });
+
+    const rawData = await response.json();
+    if (!response.ok) throw new Error(rawData.error?.message || "Error desconocido de OpenAI");
+
+    const data = JSON.parse(rawData.choices[0].message.content);
+
+    // Llenar los datos en tu diseño visual
     dishName.textContent = data.dishName || "Plato analizado";
     setScore(data.nutritionVerdict?.score);
     document.querySelector("#summary").textContent = data.nutritionVerdict?.summary || "";
@@ -123,7 +170,7 @@ analyze.addEventListener("click", async () => {
 
     results.hidden = false;
   } catch (error) {
-    errorBox.textContent = error.message;
+    errorBox.textContent = `Error: ${error.message}`;
     errorBox.hidden = false;
   } finally {
     loading.hidden = true;
